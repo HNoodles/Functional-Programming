@@ -1,6 +1,6 @@
 import { cons, Cons, List, list_to_array, nil } from "./basic";
 
-
+// 惰性cons实现，将list从值转为函数，避免无限Cons立即执行导致stack爆炸
 const lazy_cons = <T>(x: T, list: () => List<T>) => cons(x, list);
 
 /* Newton-Raphson Square Roots */
