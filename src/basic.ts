@@ -72,7 +72,7 @@ export const map_list = <U, T>(list: List<T>, f: (t: T) => U): List<U> =>
     list instanceof Nil ? nil : cons(f(list.x), map_list(list.list, f));
 
 
-
+// TODO: 整理用不到的generic高阶函数
 export const map = <A, B>(f: (a: A) => B) => reduce((a: A, b: B[]) => [...b, f(a)], []);
 
 export const compose = <A, B, C>(
