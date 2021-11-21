@@ -9,6 +9,7 @@ export const lazy_map_list = <U, T>(list: Lazy_Cons<T>, f: (t: T) => U): Lazy_Co
 // @ts-ignore 断言list.list是函数
     lazy_cons(f(list.x()), () => lazy_map_list(list.list(), f));
 
+
 /* Newton-Raphson Square Roots */
 // 单步逼近算子实现：N为需要计算平方根的值，x为上一步逼近的解
 export const next = (N: number) => (x: number) => (x + N / x) / 2;
@@ -44,12 +45,13 @@ export const relative_sqrt = (a0: number, eps: number, N: number): number => rel
 
 /* Numerical Differentiation */
 // 简易的diff实现：给定函数f和位置x，以h为偏差估算导数
-export const easy_diff = (f: (x: number) => number, x: number) => (h: number): number => (f(x + h) - f(x)) / h;
+export const easy_diff = (f: (x: number) => number, x: number) => (h: number): number => 
+    (f(x + h) - f(x)) / h;
 
 // 减半函数
 const halve = (x: number): number => x / 2;
 // 基于easy_diff的求导实现，以h0为初始偏差，逐步减半，逼近函数f在x位置上的导数
-export const differentiate = (h0: number, f: (x: number) => number, x: number) => lazy_map_list(repeat(halve, h0), easy_diff(f, x));
+export const differentiate = (h0: number, f: (x: number) => number, x: number): Lazy_Cons<number> => lazy_map_list(repeat(halve, h0), easy_diff(f, x));
 
 // 基于within的求导逼近实现
 export const within_differentiate = (eps: number, h0: number, f: (x: number) => number, x: number): number => within(eps, differentiate(h0, f, x));
@@ -87,3 +89,81 @@ export const super_improved_within_differentiate = (eps: number, h0: number, f: 
 
 
 /* Numerical Integration */
+// 简易的积分实现，衡量函数f在x = a到x = b之间与坐标轴围成的面积
+export const easy_integrate = (f: (x: number) => number, a: number, b: number): number => 
+    (f(a) + f(b)) * (b - a) / 2;
+
+// 定义Pair类型为两个同类型元素组成的array
+export class Pair<T> { constructor(readonly a: T, readonly b: T) { } };
+// 定义函数式的Pair构造
+export const pair = <T>(a: T, b: T): Pair<T> => new Pair<T>(a, b);
+// 定义对数值类型Pair的相加
+export const add_pair = (pair: Pair<number>): number => pair.a + pair.b;
+// 定义将两个Cons拼接在一起成为Pair的zip
+export const lazy_zip = <T>(first_cons: Lazy_Cons<T>, second_cons: Lazy_Cons<T>): Lazy_Cons<Pair<T>> => lazy_cons(
+    pair(first_cons.x(), second_cons.x()), 
+    // @ts-ignore 断言cons的list都存在，不为nil
+    () => lazy_zip(first_cons.list(), second_cons.list())
+);
+// 取平均数函数
+const mid = (a: number, b: number): number => (a + b) / 2;
+// 基于easy_integrate的积分实现，对a, b之间不断切分求和无限逼近
+export const integrate = (
+    f: (x: number) => number, 
+    a: number, b: number
+): Lazy_Cons<number> => lazy_cons(
+    easy_integrate(f, a, b), 
+    () => lazy_map_list(lazy_zip(
+        integrate(f, a, mid(a, b)), 
+        integrate(f, mid(a, b), b)
+    ), add_pair)
+);
+
+// 优化避免重复调用f的integrate实现
+const integ_helper = (
+    f: (x: number) => number, 
+    a: number, b: number, 
+    fa: number, fb: number
+): Lazy_Cons<number> => {
+    const m = mid(a, b);
+    const fm = f(m);
+    return lazy_cons(
+        (fa + fb) * (b - a) / 2, 
+        () => lazy_map_list(lazy_zip(
+            integ_helper(f, a, m, fa, fm), 
+            integ_helper(f, m, b, fm, fb)
+        ), add_pair)
+    )
+};
+export const efficient_integrate = (
+    f: (x: number) => number, 
+    a: number, b: number
+): Lazy_Cons<number> => integ_helper(f, a, b, f(a), f(b));
+
+// 基于within的积分逼近实现
+export const within_integrate = (
+    eps: number, 
+    f: (x: number) => number, 
+    a: number, b: number
+): number => within(eps, efficient_integrate(f, a, b));
+
+// 基于relative的积分逼近实现
+export const relative_integrate = (
+    eps: number, 
+    f: (x: number) => number, 
+    a: number, b: number
+): number => relative(eps, efficient_integrate(f, a, b));
+
+// 基于super的积分逼近
+export const super_integrate = (
+    eps: number, 
+    f: (x: number) => number, 
+    a: number, b: number
+): number => within(eps, super_order(efficient_integrate(f, a, b)));
+
+// 基于improve的积分逼近
+export const improve_integrate = (
+    eps: number, 
+    f: (x: number) => number, 
+    a: number, b: number
+): number => within(eps, improve(efficient_integrate(f, a, b)));
