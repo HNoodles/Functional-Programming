@@ -67,10 +67,12 @@ const eliminate_error = (n: number, list: Lazy_Cons<number>): Lazy_Cons<number> 
 const order = (list: Lazy_Cons<number>): number => {
     const list_next_three = take(3, list);
     const [a, b, c] = list_to_array(list_next_three);
-    return Math.round(Math.log2((a - c) / (b - c) - 1));
+    const order = Math.round(Math.log2((a - c) / (b - c) - 1));
+    // 当逼近近乎收敛时，a, b, c十分接近，会导致除0或者log(0)，此时直接返回-Infinity，表示几乎没有误差
+    return isNaN(order) ? -Infinity : order;
 };
-// 提升无限逼近序列收敛速度的函数
-const improve = (list: Lazy_Cons<number>): Lazy_Cons<number> => eliminate_error(order(list), list);
+// @ts-ignore 提升无限逼近序列收敛速度的函数，当order计算得到0的时候说明不需要进一步improve误差估计，当前值已经满足要求，直接执行下一个
+const improve = (list: Lazy_Cons<number>): Lazy_Cons<number> => order(list) === 0 ? list.list() : eliminate_error(order(list), list);
 // 提升收敛速度的基于within的求导实现
 export const improved_within_differentiate = (eps: number, h0: number, f: (x: number) => number, x: number): number => within(eps, improve(differentiate(h0, f, x)));
 // 叠加使用improve以快速提升收敛速度

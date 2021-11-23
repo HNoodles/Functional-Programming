@@ -1,4 +1,4 @@
-import { compose, list_to_array, reduce } from "../src/basic";
+import { list_to_array } from "../src/basic";
 import { next, repeat, within_sqrt, take, relative_sqrt, easy_diff, differentiate, within_differentiate, improved_within_differentiate, highly_improved_within_differentiate, super_improved_within_differentiate, easy_integrate, add_pair, pair, integrate, efficient_integrate, within_integrate, relative_integrate, improve_integrate, super_integrate } from "../src/numerical";
 
 
@@ -83,10 +83,11 @@ test('relative_integrate', () => {
     expect(relative_integrate(0.001, f, 0, 1)).toBeCloseTo(1);
 })
 
-// test('super_integrate', () => {
-//     expect(super_integrate(0.001, f, 0, 1)).toBeCloseTo(1);
-// })
+test('super_integrate', () => {
+    expect(super_integrate(0.001, Math.sin, 0, 4)).toBeCloseTo(Math.cos(0) - Math.cos(4));
+})
 
-// test('improve_integrate', () => {
-//     expect(improve_integrate(0.001, f, 0, 1)).toBeCloseTo(1);
-// })
+test('improve_integrate', () => {
+    const g = (x: number): number => 1 / (1 + x * x)
+    expect(improve_integrate(0.001, g, 0, 1)).toBeCloseTo(Math.PI / 4);
+})
