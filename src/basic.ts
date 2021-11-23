@@ -70,16 +70,3 @@ export const append = <T>(a: T[], b: T[]): T[] => list_to_array(reduce_right(con
 // 原文通过reduce + compose(cons, f)实现，这里没有成功
 export const map_list = <U, T>(list: List<T>, f: (t: T) => U): List<U> => 
     list instanceof Nil ? nil : cons(f(list.x), map_list(list.list, f));
-
-
-// TODO: 整理用不到的generic高阶函数
-export const map = <A, B>(f: (a: A) => B) => reduce((a: A, b: B[]) => [...b, f(a)], []);
-
-export const compose = <A, B, C>(
-    f: (v: B) => C, 
-    g: (v: A) => B,
-): (v: A) => C => v => f(g(v));
-
-const identity = <T>(v: T) => v;
-// @ts-ignore, for the type of parameter is undetermined
-export const composeAll = reduce(compose, identity);
