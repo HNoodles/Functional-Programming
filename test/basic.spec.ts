@@ -1,4 +1,4 @@
-import { nil, cons, list_from_array, list_to_array} from '../src/basic';
+import { nil, cons, list_from_array, list_to_array } from '../src/basic';
 import { sum_simple, sum, product, any_true, all_true, append } from '../src/basic';
 
 

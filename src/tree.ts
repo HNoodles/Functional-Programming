@@ -7,22 +7,6 @@ export const node = <T>(node: T, list: List<Tree<T>>) => new Tree<T>(node, list)
 
 
 /* Operational Functions */
-// export const tree_from_array = <T>(list: (T|Nil)[]): Tree<T> => node(list[0], tree_from_array_helper(list, 0));
-// const tree_from_array_helper = <T>(list: (T|Nil)[], index: number): List<Tree<T>> => list[0] instanceof Nil ? nil : cons(tree_from_array(sub_tree_array_of(list, index * 2 + 1)), tree_from_array_helper(list, index * 2 + 2));
-// // 对一个array取出index对应的元素为root的子树
-// // 其中如果对应元素已经是nil了，或者子元素下标越界，就返回[nil]，否则返回[对应元素，...左子树, ...右子树]
-// const sub_tree_array_of = <T>(list: (T|Nil)[], index: number): (T|Nil)[] => {
-//     const sub_tree_array = [list[index]];
-//     const left_child = (index: number) => index * 2 + 1;
-//     const right_child = (index: number) => index * 2 + 2;
-//     while ()
-// };
-//     (list[index] instanceof Nil || index * 2 + 1 >= list.length || index * 2 + 2 >= list.length) ? 
-//         [nil] : [list[index], ...sub_tree_array_of(list, index * 2 + 1), ...sub_tree_array_of(list, index * 2 + 2)];
-
-// const left_child_of = <T>(list: (T|Nil)[], index: number): T|Nil => index * 2 + 1 < list.length ? list[index * 2 + 1] : nil;
-// const right_child_of = <T>(list: (T|Nil)[], index: number): T|Nil => index * 2 + 1 < list.length ? list[index * 2 + 2] : nil;
-
 // 对Tree类型的reduce实现
 // reduce_tree直接对Tree结构操作，用f处理当前label和子树list结果，其中子树list结果由reduce_tree_helper得到
 export const reduce_tree = <U, T>(
